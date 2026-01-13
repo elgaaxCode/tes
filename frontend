@@ -1,19 +1,65 @@
-document.getElementById('btn-beli').onclick = async function() {
-    const username = document.getElementById('username').value;
-    const jumlah = document.getElementById('jumlah').value;
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beli Robux - TopUp Store</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 flex items-center justify-center min-h-screen p-4">
 
-    const response = await fetch('http://localhost:3000/api/create-transaction', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: username, jumlahRobux: jumlah })
-    });
+    <div class="w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden">
+        <div class="bg-green-600 p-4 text-white flex justify-between items-center">
+            <h1 class="font-bold text-lg">Beli Robux</h1>
+            <button class="bg-white text-green-600 px-3 py-1 rounded-full text-sm font-semibold">Cara Beli</button>
+        </div>
 
-    const data = await response.json();
-    
-    if (data.redirect_url) {
-        // Buka halaman pembayaran Midtrans (QRIS, VA, dll)
-        window.location.href = data.redirect_url;
-    } else {
-        alert("Gagal memproses pesanan.");
-    }
-};
+        <div class="p-6 space-y-6">
+            <div>
+                <label class="block text-gray-700 text-sm font-bold mb-2">Username Roblox</label>
+                <input type="text" id="username" placeholder="Ketik username di sini" 
+                    class="w-full border-2 border-gray-100 p-3 rounded-xl focus:border-green-500 outline-none transition">
+            </div>
+
+            <div>
+                <div class="flex justify-between items-center mb-2">
+                    <label class="block text-gray-700 text-sm font-bold">Jumlah Robux</label>
+                    <span class="text-xs text-green-600 font-medium">Stok: 437.528</span>
+                </div>
+                <div class="flex items-center border-2 border-gray-100 rounded-xl px-3 focus-within:border-green-500 transition">
+                    <span class="text-green-600 font-bold mr-2">R$</span>
+                    <input type="number" id="jumlah" placeholder="Contoh: 1000" 
+                        class="w-full py-3 outline-none" oninput="hitungHarga()">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-gray-700 text-sm font-bold mb-2 text-xs">Harga Rp12.300 / 100 Robux</label>
+                <div class="flex items-center bg-gray-50 border-2 border-gray-100 rounded-xl px-3">
+                    <span class="text-gray-500 font-bold mr-2 font-mono">Rp</span>
+                    <input type="text" id="total_harga" class="w-full py-3 bg-transparent font-bold text-green-700 outline-none" readonly value="0">
+                </div>
+            </div>
+
+            <button id="btn-beli" class="w-full bg-green-500 hover:bg-green-600 text-white font-black py-4 rounded-2xl shadow-lg transition transform active:scale-95">
+                LANJUTKAN PEMBELIAN
+            </button>
+
+            <div class="flex items-center justify-center space-x-2 text-xs text-gray-400">
+                <span>🛡️</span>
+                <p>Garansi 100% Robux Masuk dan Aman</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function hitungHarga() {
+            const jumlah = document.getElementById('jumlah').value;
+            const hargaPer100 = 12300;
+            const total = (jumlah / 100) * hargaPer100;
+            
+            document.getElementById('total_harga').value = jumlah > 0 ? total.toLocaleString('id-ID') : 0;
+        }
+    </script>
+</body>
+</html>
