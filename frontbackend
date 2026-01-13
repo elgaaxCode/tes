@@ -1,0 +1,19 @@
+document.getElementById('btn-beli').onclick = async function() {
+    const username = document.getElementById('username').value;
+    const jumlah = document.getElementById('jumlah').value;
+
+    const response = await fetch('http://localhost:3000/api/create-transaction', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: username, jumlahRobux: jumlah })
+    });
+
+    const data = await response.json();
+    
+    if (data.redirect_url) {
+        // Buka halaman pembayaran Midtrans (QRIS, VA, dll)
+        window.location.href = data.redirect_url;
+    } else {
+        alert("Gagal memproses pesanan.");
+    }
+};
