@@ -1,0 +1,70 @@
+npm install express body-parser midtrans-client cors
+
+const express = require('express');
+const bodyParser = require('body-parser');
+const midtransClient = require('midtrans-client');
+const cors = require('cors');
+
+const app = express();
+app.use(cors());
+app.use(bodyParser.json());
+
+// Konfigurasi Midtrans (Ganti dengan Server Key Anda dari Dashboard Midtrans)
+let snap = new midtransClient.Snap({
+    isProduction: false, // Ubah ke true jika sudah siap jualan beneran
+    serverKey: 'Mid-server-3dwxlfmFgLf44ca36kzsM_EF',
+    clientKey: 'Mid-client-35V_kpwyo7pR5Lsg'
+});
+
+app.post('/api/create-transaction', async (req, res) => {
+    try {
+        const { username, jumlahRobux } = req.body;
+
+        // 1. Validasi & Hitung Harga (Sama dengan logika frontend)
+        const hargaPer100 = 12300;
+        const totalHarga = (jumlahRobux / 100) * hargaPer100;
+
+        if (jumlahRobux < 100) {
+            return res.status(400).json({ message: "Minimal pembelian 100 Robux" });
+        }
+
+        // 2. Buat Parameter Transaksi untuk Midtrans
+        let parameter = {
+            "transaction_details": {
+                "order_id": "ORDER-" + Math.floor(Math.random() * 1000000), // ID unik
+                "gross_amount": totalHarga
+            },
+            "credit_card": {
+                "secure": true
+            },
+            "customer_details": {
+                "first_name": username, // Menggunakan username Roblox sebagai nama
+            },
+            "item_details": [{
+                "id": "RBX-01",
+                "price": hargaPer100 / 100, // Harga per 1 robux
+                "quantity": jumlahRobux,
+                "name": "Top Up " + jumlahRobux + " Robux"
+            }]
+        };
+
+        // 3. Minta Token Transaksi ke Midtrans
+        const transaction = await snap.createTransaction(parameter);
+        
+        // Kirim link pembayaran (redirect_url) ke frontend
+        res.json({
+            token: transaction.token,
+            redirect_url: transaction.redirect_url
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Terjadi kesalahan pada server" });
+    }
+});
+
+// Jalankan Server
+const PORT = 3000;
+app.listen(PORT, () => {
+    console.log(`Server berjalan di http://localhost:${PORT}`);
+});
